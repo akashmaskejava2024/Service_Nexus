@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">My Active Requests</h1>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">Manage your posted jobs and review worker bids.</p>
+        </div>
+        <a href="{% url 'map_view' %}" class="w-full sm:w-auto text-center inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+            Post New Request
+        </a>
+    </div>
+
+    <!-- Messages Display -->
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 mb-4 text-sm {% if message.tags == 'success' %}text-green-800 bg-green-50 dark:bg-gray-800 dark:text-green-400{% else %}text-red-800 bg-red-50 dark:bg-gray-800 dark:text-red-400{% endif %} rounded-lg" role="alert">
+            <span class="font-medium">{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not requests %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-12 text-center border dark:border-gray-700">
+            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No active requests</h3>
+            <p class="text-gray-500 dark:text-gray-400">Get started by posting a request on the map.</p>
+            <div class="mt-6">
+                <a href="{% url 'map_view' %}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
+                    Go to Map View &rarr;
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="space-y-8">
+            {% for req in requests %}
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border dark:border-gray-700 overflow-hidden">
+                    
+                    <div class="flex flex-col md:flex-row">
+                        <!-- Request Details Left Side -->
+                        <div class="md:w-1/3 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                            <!-- Image -->
+                            <div class="h-48 w-full relative">
+                                {% if req.photo %}
+                                    <img src="{{ req.photo.url }}" alt="Problem Photo" class="w-full h-full object-cover">
+                                {% else %}
+                                    <div class="flex items-center justify-center h-full bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500">
+                                        <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Status Badge -->
+                                <div class="absolute top-4 left-4">
+                                    {% if req.status == 'PENDING' %}
+                                        <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded shadow-sm dark:bg-green-900 dark:text-green-300">
+                                            Pending Bids
+                                        </span>
+                                    {% elif req.status == 'ACCEPTED' %}
+                                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded shadow-sm dark:bg-blue-900 dark:text-blue-300">
+                                            Job Accepted
+                                        </span>
+                                    {% else %}
+                                        <span class="bg-gray-300 text-gray-800 text-xs font-bold px-3 py-1 rounded shadow-sm dark:bg-gray-700 dark:text-gray-300">
+                                            Completed
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Description Area -->
+                            <div class="p-5">
+                                <h3 class="font-bold text-gray-900 dark:text-white mb-2 underline decoration-gray-300 dark:decoration-gray-600 underline-offset-4">Problem Description</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 whitespace-pre-wrap">{{ req.description }}</p>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-500"><span class="font-bold">Requested:</span> {{ req.created_at|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Bids Section Right Side -->
+                        <div class="md:w-2/3 p-6">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-3 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                Worker Bids
+                            </h3>
+                            
+                            <!-- Bids List -->
+                            {% if req.bids.all %}
+                                <div class="space-y-4">
+                                    {% for bid in req.bids.all %}
+                                        
+                                        <!-- Hide other bids if one is accepted AND it's not THIS bid -->
+                                        {% if req.status != 'ACCEPTED' or bid.is_accepted %}
+                                            
+                                            <div class="bg-white dark:bg-gray-800 border {% if bid.is_accepted %}border-blue-500 ring-1 ring-blue-500 shadow-md bg-blue-50/50 dark:bg-blue-900/20{% else %}border-gray-200 dark:border-gray-700{% endif %} rounded-lg p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-all hover:border-blue-300 dark:hover:border-blue-600">
+                                                
+                                                <div class="flex-grow">
+                                                    <div class="flex items-baseline gap-2 mb-1">
+                                                        <span class="font-bold text-gray-900 dark:text-white text-lg">{{ bid.worker.user.username }}</span>
+                                                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 capitalize">
+                                                            {{ bid.worker.category }}
+                                                        </span>
+                                                    </div>
+                                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                                        {% if bid.message %}
+                                                            "{{ bid.message }}"
+                                                        {% else %}
+                                                            <span class="italic text-gray-400">No additional message provided.</span>
+                                                        {% endif %}
+                                                    </p>
+                                                    
+                                                    {% if bid.is_accepted %}
+                                                        <p class="text-xs font-bold text-blue-600 dark:text-blue-400 mt-2 flex items-center gap-1">
+                                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                                            Bid Accepted
+                                                        </p>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <div class="flex flex-row lg:flex-col items-center justify-between lg:items-end gap-3 lg:gap-2 lg:pl-4 lg:border-l border-gray-100 dark:border-gray-700 w-full lg:w-auto border-t lg:border-t-0 pt-3 lg:pt-0 mt-2 lg:mt-0">
+                                                    <div class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                                                        ${{ bid.amount }}
+                                                    </div>
+                                                    
+                                                    {% if req.status == 'PENDING' %}
+                                                        <form method="POST" action="{% url 'accept_bid' bid.id %}" class="m-0">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800 transition-colors shadow-sm whitespace-nowrap">
+                                                                Accept Bid
+                                                            </button>
+                                                        </form>
+                                                    {% elif bid.is_accepted and req.status == 'ACCEPTED' %}
+                                                        <div class="text-right flex flex-col items-end">
+                                                            <button type="button" onclick="openQRModal('{{ req.id }}')" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-bold rounded-lg text-sm px-4 py-2 shadow-sm whitespace-nowrap dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 flex items-center gap-2 transition-colors">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                                                                Scan QR
+                                                            </button>
+                                                        </div>
+                                                    {% elif bid.is_accepted and req.status == 'COMPLETED' %}
+                                                        <button disabled class="text-gray-700 bg-gray-100 font-bold rounded-lg text-sm px-4 py-2 border border-gray-200 cursor-default shadow-inner whitespace-nowrap dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700">
+                                                            Completed
+                                                        </button>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                            </div>
+                                            
+                                        {% endif %} <!-- End Hide Logic -->
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="bg-gray-50 dark:bg-gray-800/80 rounded-lg p-6 text-center border border-dashed border-gray-300 dark:border-gray-600">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Waiting for workers in your area to submit bids.</p>
+                                    <!-- A small pulsing dot to indicate "waiting" state -->
+                                    <div class="mt-3 flex justify-center">
+                                        <span class="relative flex h-3 w-3">
+                                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                          <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- HTML5 QR Scanner Modal -->
+<div id="qrModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900/50 backdrop-blur-sm flex">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Scan Worker's QR Code
+                </h3>
+                <button type="button" onclick="closeQRModal()" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5">
+                <p class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4">Point your camera at the QR code displayed on the worker's device to securely complete the job and leave feedback.</p>
+                
+                <div id="reader" class="mx-auto w-full max-w-sm rounded-lg overflow-hidden border-2 border-dashed border-blue-300 dark:border-gray-500 bg-gray-50 dark:bg-gray-800 min-h-[250px] relative flex justify-center items-center">
+                    <!-- Scanner injects here -->
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <p class="text-xs text-center text-gray-500 dark:text-gray-400 mb-2">Or enter completion token manually (offline fallback):</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="manualToken" placeholder="Paste Token (UUID) here..." class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white">
+                        <button type="button" onclick="submitManualToken()" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+    let html5QrcodeScanner = null;
+    let currentReqId = null;
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // Stop scanning
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear();
+        }
+        // Redirect browser directly to the scanned URL
+        // Example decodedText: "http://127.0.0.1:8000/complete-job/1/a7s8d-8a9sd..."
+        window.location.href = decodedText;
+    }
+
+    function onScanFailure(error) {
+        // handle scan failure, usually better to ignore and keep scanning
+    }
+
+    function openQRModal(reqId) {
+        currentReqId = reqId; // Store for manual fallback
+        const modal = document.getElementById('qrModal');
+        modal.classList.remove('hidden');
+        
+        // Initialize Scanner on open
+        if (!html5QrcodeScanner) {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                { fps: 10, qrbox: {width: 250, height: 250} },
+                /* verbose= */ false);
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+    }
+
+    function closeQRModal() {
+        const modal = document.getElementById('qrModal');
+        modal.classList.add('hidden');
+        if (html5QrcodeScanner) {
+            // Stop camera to clear resources
+            html5QrcodeScanner.clear().then(() => {
+                html5QrcodeScanner = null;
+            });
+        }
+    }
+
+    function submitManualToken() {
+        const token = document.getElementById('manualToken').value.trim();
+        if (token && currentReqId) {
+            // Construct the path and redirect
+            window.location.href = `/complete-job/${currentReqId}/${token}/`;
+        } else {
+            alert('Please enter a valid token.');
+        }
+    }
+</script>
+{% endblock %}
