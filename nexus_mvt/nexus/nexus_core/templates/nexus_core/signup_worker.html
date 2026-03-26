@@ -1,53 +1,85 @@
 {% extends 'nexus_core/base.html' %}
 
 {% block extra_head %}
-<!-- Leaflet CSS via CDN -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <style>
     #map { height: 350px; width: 100%; border-radius: 0.5rem; z-index: 10; cursor: crosshair;}
+    
+    /* 1. Hide Django's default help text/lists initially */
+    .helptext, p > ul:not(.errorlist) {
+        display: none;
+        font-size: 0.75rem;
+        color: #6b7280; /* Gray-500 */
+        margin-top: 0.25rem;
+        margin-left: 0.5rem;
+        list-style-type: disc;
+    }
+
+    /* 2. Style for the dynamic validation messages */
+    .js-error-msg {
+        color: #ef4444; /* Red-500 */
+        font-size: 0.8125rem;
+        margin-top: 0.25rem;
+        display: block;
+        font-weight: 500;
+    }
+
+    /* Standardizing spacing for Django's as_p output */
+    form p {
+        margin-bottom: 1.25rem;
+        position: relative;
+    }
+
+    /* Form input styling overrides for consistency */
+    input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea {
+        width: 100%;
+        padding: 0.625rem;
+        border-radius: 0.5rem;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="flex items-center justify-center min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl w-full space-y-8 bg-white p-10 rounded-xl shadow border dark:bg-gray-800 dark:border-gray-700">
+    <div class="max-w-2xl w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
         <div>
             <h2 class="mt-6 text-center text-3xl tracking-tight font-extrabold text-gray-900 dark:text-white">
                 Register as a Worker
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                Join Service-Nexus to start receiving local jobs.
+                Create your Service-Nexus account to start serving Pimpri-Chinchwad.
             </p>
         </div>
-        <form class="mt-8 space-y-6" method="POST">
+        
+        <form class="mt-8 space-y-6" method="POST" id="worker-reg-form" novalidate>
             {% csrf_token %}
             
             {% if form.errors %}
             <div class="p-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 border border-red-200 dark:border-red-800" role="alert">
-                <span class="font-bold block mb-1">Please correct the following errors:</span>
+                <span class="font-bold block mb-1">Validation Error:</span>
                 {{ form.non_field_errors }}
-                <!-- The individual field errors will still show below near their inputs -->
             </div>
             {% endif %}
 
-            <div class="space-y-4 [&>p>ul.errorlist]:text-red-600 [&>p>ul.errorlist]:text-sm [&>p>ul.errorlist]:mt-1 [&>p>ul]:list-disc [&>p>ul]:ml-4">
+            <div class="space-y-2">
                 {{ form.as_p }}
                 
-                <hr class="my-4 border-gray-200 dark:border-gray-700">
+                <hr class="my-6 border-gray-200 dark:border-gray-700">
                 
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Set Your Home Base</h3>
-                    <p class="text-sm text-gray-500 mb-4">Click on the map to drop a pin. You will only receive job requests within a 5km radius of this location.</p>
+                    <p class="text-sm text-gray-500 mb-4 italic">Click the map to set your work location. You will receive jobs within a 5km radius.</p>
                     
-                    <!-- The Leaflet Map container -->
-                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-1">
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-1 bg-gray-50">
                         <div id="map"></div>
                     </div>
                 </div>
             </div>
 
             <div class="pt-4">
-                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:scale-[1.01]">
                     Complete Registration
                 </button>
             </div>
@@ -61,49 +93,115 @@
     </div>
 </div>
 
-<!-- Leaflet JS via CDN -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-    var map = L.map('map').setView([51.505, -0.09], 12);
+    // --- 1. MAP & GEOLOCATION ---
+    // Default to Pimpri-Chinchwad [18.6298, 73.7997]
+    var map = L.map('map').setView([18.6298, 73.7997], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '© OpenStreetMap'
+        attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
     var marker = null;
-    
-    // Form fields generated by Django for the HiddenInputs
     var latInput = document.getElementById('id_latitude');
     var lngInput = document.getElementById('id_longitude');
 
-    // Automatically locate user
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(function(position) {
             var userLat = position.coords.latitude;
             var userLng = position.coords.longitude;
-            var currentLatLng = new L.LatLng(userLat, userLng);
-            
-            map.setView(currentLatLng, 14);
-            marker = L.marker(currentLatLng).addTo(map);
-            latInput.value = userLat;
-            lngInput.value = userLng;
-        }, function(error) {
-            console.log("Geolocation blocked or failed.");
+            map.setView([userLat, userLng], 14);
+            marker = L.marker([userLat, userLng]).addTo(map);
+            if(latInput) latInput.value = userLat;
+            if(lngInput) lngInput.value = userLng;
         });
     }
 
     map.on('click', function(e) {
-        var lat = e.latlng.lat;
-        var lng = e.latlng.lng;
+        if (marker) { marker.setLatLng(e.latlng); } 
+        else { marker = L.marker(e.latlng).addTo(map); }
+        if(latInput) latInput.value = e.latlng.lat;
+        if(lngInput) lngInput.value = e.latlng.lng;
+    });
 
-        if (marker) {
-            marker.setLatLng(e.latlng);
-        } else {
-            marker = L.marker(e.latlng).addTo(map);
-        }
+    // --- 2. VALIDATION & UI ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('form input:not([type="hidden"]), form select, form textarea');
+        
+        // Convert $ to ₹ in labels
+        document.querySelectorAll('label').forEach(label => {
+            if (label.innerHTML.includes('$')) {
+                label.innerHTML = label.innerHTML.replace('$', '₹');
+            }
+        });
 
-        latInput.value = lat;
-        lngInput.value = lng;
+        inputs.forEach(input => {
+            // Create error container
+            const errorSpan = document.createElement('span');
+            errorSpan.className = 'js-error-msg hidden';
+            input.parentNode.appendChild(errorSpan);
+
+            // FOCUS: Show Django's help hints
+            input.addEventListener('focus', function() {
+                const parentP = input.closest('p');
+                const helpText = parentP ? parentP.querySelector('.helptext, ul:not(.errorlist)') : null;
+                if (helpText) helpText.style.display = 'block';
+            });
+
+            // INPUT: Clear errors and reset borders while typing
+            input.addEventListener('input', function() {
+                errorSpan.classList.add('hidden');
+                input.classList.remove('border-red-500', 'dark:border-red-500');
+                input.classList.remove('border-green-500');
+            });
+
+            // BLUR: The "Overrule" Logic
+            input.addEventListener('blur', function() {
+                const parentP = input.closest('p');
+                const helpText = parentP ? parentP.querySelector('.helptext, ul:not(.errorlist)') : null;
+                if (helpText) helpText.style.display = 'none';
+
+                let error = "";
+                const val = input.value.trim();
+
+                // Validation Checks
+                if (!val && input.hasAttribute('required')) {
+                    error = "This field is required.";
+                }
+                // USERNAME CHECK: Not numeric + Min length
+                else if (val && (input.name === 'username' || input.id.includes('username'))) {
+                    const hasLetters = /[a-zA-Z]/.test(val);
+                    if (!hasLetters) {
+                        error = "Username cannot be purely numeric. Please add at least one letter.";
+                    } else if (val.length < 4) {
+                        error = "Username is too short (min 4 characters).";
+                    }
+                }
+                // EMAIL CHECK
+                else if (val && input.type === 'email' && !input.checkValidity()) {
+                    error = "Please enter a valid email address.";
+                }
+                // PASSWORD CHECK
+                else if (val && input.type === 'password' && input.name.includes('password1')) {
+                    if (val.length < 8) {
+                        error = "Password must be at least 8 characters.";
+                    }
+                }
+
+                // UI Execution
+                if (error) {
+                    errorSpan.textContent = error;
+                    errorSpan.classList.remove('hidden');
+                    input.classList.add('border-red-500');
+                    input.classList.remove('border-green-500');
+                } else if (val) {
+                    input.classList.remove('border-red-500');
+                    input.classList.add('border-green-500');
+                    errorSpan.classList.add('hidden');
+                }
+            });
+        });
     });
 </script>
 {% endblock %}

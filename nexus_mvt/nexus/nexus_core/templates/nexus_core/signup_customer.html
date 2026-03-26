@@ -39,4 +39,85 @@
         </form>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('form input:not([type="hidden"])');
+        
+        document.querySelectorAll('label').forEach(label => {
+            if (label.innerHTML.includes('$')) {
+                label.innerHTML = label.innerHTML.replace('$', '₹');
+            }
+        });
+
+        inputs.forEach(input => {
+            // Create a unique error span for each input if it doesn't exist
+            let errorSpan = input.parentNode.querySelector('.js-error-msg');
+            if (!errorSpan) {
+                errorSpan = document.createElement('span');
+                errorSpan.className = 'js-error-msg hidden';
+                input.parentNode.appendChild(errorSpan);
+            }
+
+            // FOCUS: Show the help text/hints when the user clicks the field
+            input.addEventListener('focus', function() {
+                const parentP = input.closest('p');
+                const helpText = parentP ? parentP.querySelector('.helptext, ul:not(.errorlist)') : null;
+                if (helpText) helpText.style.display = 'block';
+            });
+
+            // INPUT: Reset the styling while they are typing (don't show errors yet)
+            input.addEventListener('input', function() {
+                errorSpan.classList.add('hidden');
+                input.classList.remove('border-red-500', 'dark:border-red-500', 'border-green-500');
+            });
+
+            // BLUR: The "Overrule" logic - check everything when they click away
+            input.addEventListener('blur', function() {
+                const parentP = input.closest('p');
+                const helpText = parentP ? parentP.querySelector('.helptext, ul:not(.errorlist)') : null;
+                if (helpText) helpText.style.display = 'none'; // Hide hints on blur
+
+                let error = "";
+                const val = input.value.trim();
+
+                // 1. Check Required
+                if (!val && input.hasAttribute('required')) {
+                    error = "This field is required.";
+                }
+                // 2. USERNAME VALIDATION: Not purely numeric + Min length
+                else if (val && (input.name === 'username' || input.id.includes('username'))) {
+                    const hasLetters = /[a-zA-Z]/.test(val);
+                    if (!hasLetters) {
+                        error = "Username cannot be purely numeric. Add at least one letter.";
+                    } else if (val.length < 4) {
+                        error = "Username must be at least 4 characters.";
+                    }
+                }
+                // 3. EMAIL VALIDATION
+                else if (val && input.type === 'email' && !input.checkValidity()) {
+                    error = "Please enter a valid email address.";
+                }
+                // 4. PASSWORD VALIDATION
+                else if (val && input.type === 'password' && input.name.includes('password1')) {
+                    if (val.length < 8) {
+                        error = "Password must be at least 8 characters.";
+                    }
+                }
+
+                // UI Final Execution
+                if (error) {
+                    errorSpan.textContent = error;
+                    errorSpan.classList.remove('hidden');
+                    input.classList.add('border-red-500');
+                    input.classList.remove('border-green-500');
+                } else if (val) {
+                    // Success styling
+                    errorSpan.classList.add('hidden');
+                    input.classList.remove('border-red-500');
+                    input.classList.add('border-green-500');
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
