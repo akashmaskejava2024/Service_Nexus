@@ -1,4 +1,4 @@
-# Nexus | Hyper-Local Service Marketplace 📍
+# Nexus | Hyper-Local Service Marketplace 
 
 **Nexus** is a real-time, location-aware marketplace designed to connect local service providers (Workers) with users in need of assistance (Customers). By leveraging geospatial coordinates, Nexus allows for precise job matching, competitive bidding, and secure job completion verification.
 
