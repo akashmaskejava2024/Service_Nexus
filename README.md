@@ -4,9 +4,9 @@
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
-### 👤 Dual User Workflows
+###  Dual User Workflows
 * **For Customers:** * Drop a pin on an interactive map to request services.
     * Upload images via **Pillow** to provide visual context for the task.
     * Review and accept competitive bids from local workers.
@@ -15,17 +15,17 @@
     * Submit custom bids with pricing and messages.
     * Track active, pending, and completed job history.
 
-### 📍 Geospatial Intelligence
+###  Geospatial Intelligence
 * Integrated **Leaflet.js** and **OpenStreetMap** for an interactive, pin-drop location system.
 * Backend logic calculates proximity based on precise latitude and longitude coordinates.
 
-### 🔐 Secure Verification (QR Code)
+###  Secure Verification (QR Code)
 * **Verification Engine:** Uses the `qrcode` library to generate unique, in-memory tokens upon job completion.
 * **Fraud Prevention:** Customers scan the worker's QR code to officially mark a job as `COMPLETED`, triggering the feedback and rating system.
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 * **Backend:** Python 3.x, Django (MVT Architecture)
 * **Frontend:** React (Vite), Tailwind CSS, Leaflet.js
@@ -34,7 +34,7 @@
 
 ---
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
 1. **Clone the repository:**
    ```bash
