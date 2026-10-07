@@ -28,7 +28,7 @@
 ##  Tech Stack
 
 * **Backend:** Python 3.x, Django (MVT Architecture)
-* **Frontend:** React (Vite), Tailwind CSS, Leaflet.js
+* **Frontend:** Jinja, Tailwind CSS, Leaflet.js
 * **Database:** SQLite (Relational schema with Geospatial fallbacks)
 * **Key Libraries:** `qrcode`, `Pillow`, `asgiref`
 
