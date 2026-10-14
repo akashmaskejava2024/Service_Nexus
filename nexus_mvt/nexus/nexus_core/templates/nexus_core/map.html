@@ -1,116 +1,312 @@
 {% extends 'nexus_core/base.html' %}
 
 {% block extra_head %}
-<!-- Leaflet CSS via CDN -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+/>
+
 <style>
-    #map { height: 100vh; width: 100%; z-index: 10; cursor: crosshair;}
+    #map {
+        height: 100vh;
+        width: 100%;
+        z-index: 10;
+        cursor: crosshair;
+    }
+
+    #serviceModal {
+        z-index: 1000;
+    }
+
+    .leaflet-container {
+        font-family: inherit;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+
 <div class="relative w-full h-screen">
-    <!-- Full Screen Map -->
+
+    <!-- Full-Screen Map -->
     <div id="map"></div>
 
-    <!-- Tailwind CSS Modal (Hidden by Default) -->
-    <div id="serviceModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900 bg-opacity-50">
-        <div class="relative p-4 w-full max-w-md max-h-full top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <!-- Modal content -->
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <!-- Modal header -->
-                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        Request Service Here
-                    </h3>
-                    <button type="button" onclick="closeModal()" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="serviceModal">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                        </svg>
-                        <span class="sr-only">Close modal</span>
-                    </button>
-                </div>
-                <!-- Modal body -->
-                <form class="p-4 md:p-5 overflow-y-auto max-h-[70vh]" method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <!-- Autofilled Hidden Coordinates -->
-                    <input type="hidden" name="latitude" id="latitude">
-                    <input type="hidden" name="longitude" id="longitude">
+    <!-- Service Request Modal -->
+    <div
+        id="serviceModal"
+        class="hidden fixed inset-0 z-50 items-center justify-center
+               bg-black/50 p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+    >
 
-                    <div class="grid gap-4 mb-4 grid-cols-1">
-                        <div>
-                            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Describe Your Problem</label>
-                            <textarea id="description" name="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="E.g., My pipe is leaking under the sink..." required></textarea>
-                        </div>
-                        <div>
-                            <label for="photo" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload a Photo</label>
-                            <input type="file" id="photo" name="photo" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400">
-                        </div>
-                    </div>
-                    <button type="submit" class="text-white inline-flex w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                        Submit Request
-                    </button>
-                </form>
+        <div class="relative w-full max-w-md max-h-[90vh] overflow-y-auto
+                    rounded-lg bg-white shadow-xl">
+
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b p-4">
+
+                <h3 id="modalTitle"
+                    class="text-lg font-semibold text-gray-900">
+                    Request Service Here
+                </h3>
+
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="rounded-lg p-2 text-gray-500
+                           hover:bg-gray-100 hover:text-gray-900"
+                    aria-label="Close modal"
+                >
+                    &times;
+                </button>
+
             </div>
+
+            <!-- Modal Body -->
+            <form
+                id="serviceForm"
+                class="space-y-4 p-5"
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                {% csrf_token %}
+
+                <!-- Selected Coordinates -->
+                <input
+                    type="hidden"
+                    name="latitude"
+                    id="latitude"
+                    required
+                >
+
+                <input
+                    type="hidden"
+                    name="longitude"
+                    id="longitude"
+                    required
+                >
+
+                <div>
+                    <label
+                        for="description"
+                        class="mb-2 block text-sm font-medium text-gray-900"
+                    >
+                        Describe Your Problem
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="4"
+                        required
+                        class="block w-full rounded-lg border border-gray-300
+                               bg-gray-50 p-2.5 text-sm text-gray-900
+                               focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="E.g., My pipe is leaking under the sink..."
+                    ></textarea>
+                </div>
+
+                <div>
+                    <label
+                        for="photo"
+                        class="mb-2 block text-sm font-medium text-gray-900"
+                    >
+                        Upload a Photo
+                    </label>
+
+                    <input
+                        type="file"
+                        id="photo"
+                        name="photo"
+                        accept="image/*"
+                        class="block w-full cursor-pointer rounded-lg
+                               border border-gray-300 bg-gray-50
+                               text-sm text-gray-900"
+                    >
+                </div>
+
+                <!-- Selected Location -->
+                <p class="text-sm text-gray-600">
+                    Selected location:
+                    <span id="selectedLocation">Not selected</span>
+                </p>
+
+                <button
+                    type="submit"
+                    class="w-full rounded-lg bg-blue-700 px-5 py-2.5
+                           text-center text-sm font-medium text-white
+                           hover:bg-blue-800 focus:outline-none
+                           focus:ring-4 focus:ring-blue-300"
+                >
+                    Submit Request
+                </button>
+
+            </form>
+
         </div>
     </div>
+
 </div>
 
-<!-- Leaflet JS via CDN -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<!-- Leaflet JavaScript -->
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+></script>
+
 <script>
-    // Initialize Leaflet Map (Defaulted center, will update when we get user's location if needed)
-    var map = L.map('map').setView([51.505, -0.09], 13);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
+    // Default map location: London.
+    // The map automatically moves to the user's location when permitted.
+    const map = L.map('map').setView([51.505, -0.09], 13);
+
+    // Free Map Tile Layers (100% Free, Zero API Key Required)
+    const osmHot = L.tileLayer(
+        'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+        {
+            maxZoom: 19,
+            subdomains: 'abc',
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles courtesy of <a href="https://www.hotosm.org/">HOT</a>'
+        }
+    );
+
+    const googleStreets = L.tileLayer(
+        'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+        {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; Google Maps'
+        }
+    );
+
+    const esriStreets = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        {
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri'
+        }
+    );
+
+    // Default active layer
+    osmHot.addTo(map);
+
+    // Add interactive layer selector so users can switch between free map providers
+    L.control.layers({
+        "OpenStreetMap (HOT)": osmHot,
+        "Google Streets": googleStreets,
+        "Esri Streets": esriStreets
     }).addTo(map);
 
-    var marker = null;
-    var modal = document.getElementById('serviceModal');
-    var latInput = document.getElementById('latitude');
-    var lngInput = document.getElementById('longitude');
+    // Map variables
+    let marker = null;
 
-    // Automatically center map to user's current location if permitted
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            var userLat = position.coords.latitude;
-            var userLng = position.coords.longitude;
-            map.setView([userLat, userLng], 14);
-        }, function(error) {
-            console.log("Geolocation blocked or failed.");
-        });
-    }
+    const modal = document.getElementById('serviceModal');
+    const latInput = document.getElementById('latitude');
+    const lngInput = document.getElementById('longitude');
+    const selectedLocation =
+        document.getElementById('selectedLocation');
 
-    // Handle map click
-    map.on('click', function(e) {
-        var lat = e.latlng.lat;
-        var lng = e.latlng.lng;
-
-        // Place or move marker
-        if (marker) {
-            marker.setLatLng(e.latlng);
-        } else {
-            marker = L.marker(e.latlng).addTo(map);
-        }
-
-        // Populate hidden fields
-        latInput.value = lat;
-        lngInput.value = lng;
-
-        // Open Tailwind Modal
+    // Open modal
+    function openModal() {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-    });
 
+        document.getElementById('description').focus();
+    }
+
+    // Close modal
     function closeModal() {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+
+        // Remove marker when closing.
         if (marker) {
             map.removeLayer(marker);
             marker = null;
         }
+
+        // Clear selected coordinates.
+        latInput.value = '';
+        lngInput.value = '';
+
+        selectedLocation.textContent = 'Not selected';
     }
+
+    // Get selected location from a map click.
+    map.on('click', function (event) {
+        const latitude = event.latlng.lat;
+        const longitude = event.latlng.lng;
+
+        // Add or move marker.
+        if (marker) {
+            marker.setLatLng(event.latlng);
+        } else {
+            marker = L.marker(event.latlng).addTo(map);
+        }
+
+        // Save coordinates for Django POST request.
+        latInput.value = latitude.toFixed(7);
+        lngInput.value = longitude.toFixed(7);
+
+        selectedLocation.textContent =
+            latitude.toFixed(5) + ', ' + longitude.toFixed(5);
+
+        // Show service request modal.
+        openModal();
+    });
+
+    // Locate the user if permission is granted.
+    if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+
+                map.setView([userLat, userLng], 15);
+
+                L.circleMarker([userLat, userLng], {
+                    radius: 7,
+                    color: '#2563eb',
+                    fillColor: '#3b82f6',
+                    fillOpacity: 0.8
+                })
+                .addTo(map)
+                .bindPopup('Your current location');
+            },
+            function (error) {
+                console.log(
+                    'Unable to retrieve location:',
+                    error.message
+                );
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            }
+        );
+    }
+
+    // Close modal when clicking outside the form.
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Close modal with Escape.
+    document.addEventListener('keydown', function (event) {
+        if (
+            event.key === 'Escape' &&
+            !modal.classList.contains('hidden')
+        ) {
+            closeModal();
+        }
+    });
 </script>
+
 {% endblock %}

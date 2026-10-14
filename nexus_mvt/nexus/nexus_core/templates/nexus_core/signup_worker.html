@@ -98,9 +98,25 @@
     // --- 1. MAP & GEOLOCATION ---
     // Default to Pimpri-Chinchwad [18.6298, 73.7997]
     var map = L.map('map').setView([18.6298, 73.7997], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Free Map Tile Layers (100% Free, Zero API Key Required)
+    const osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
+        subdomains: 'abc',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles courtesy of <a href="https://www.hotosm.org/">HOT</a>'
+    });
+
+    const googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: '&copy; Google Maps'
+    });
+
+    // Default layer
+    osmHot.addTo(map);
+
+    L.control.layers({
+        "OpenStreetMap (HOT)": osmHot,
+        "Google Streets": googleStreets
     }).addTo(map);
 
     var marker = null;
