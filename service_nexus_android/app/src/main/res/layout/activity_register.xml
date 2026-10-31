@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F8FAFC">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Join Service-Nexus"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="#1E293B"
+            android:layout_marginBottom="24dp"/>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/roleToggleGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:selectionRequired="true"
+            android:layout_marginBottom="20dp">
+
+            <Button
+                android:id="@+id/btnRoleCustomer"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Customer"/>
+
+            <Button
+                android:id="@+id/btnRoleWorker"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Service Worker"/>
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="#FFFFFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Username"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etUsername"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Email"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Password"
+                    app:passwordToggleEnabled="true"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Trade Category"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:visibility="gone"
+                    android:layout_marginBottom="16dp">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actvCategory"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button
+                    android:id="@+id/btnRegister"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:text="Create Account"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="12dp"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/tvLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Already have an account? Sign In"
+            android:textColor="#2563EB"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:clickable="true"
+            android:focusable="true"/>
+
+    </LinearLayout>
+</ScrollView>

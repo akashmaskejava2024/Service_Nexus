@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Job Completion QR Code"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#0F172A"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Present this QR code to the customer upon job arrival/completion to verify."
+        android:textSize="14sp"
+        android:textColor="#64748B"
+        android:gravity="center"
+        android:layout_marginBottom="24dp"/>
+
+    <ImageView
+        android:id="@+id/ivQrCode"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:background="#F1F5F9"
+        android:contentDescription="Job QR Code"
+        android:layout_marginBottom="32dp"/>
+
+    <Button
+        android:id="@+id/btnClose"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="Close"/>
+
+</LinearLayout>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8FAFC">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#FFFFFF"
+        app:title="Create Service Request"
+        app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <org.osmdroid.views.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tap anywhere on map to drop location pin"
+            android:background="#CC0F172A"
+            android:textColor="#FFFFFF"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="16dp"/>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:background="#FFFFFF">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Describe repair problem (e.g. Broken faucet)"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_marginBottom="12dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minLines="2"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <Button
+                android:id="@+id/btnAttachPhoto"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Attach Photo"/>
+
+            <ImageView
+                android:id="@+id/ivSelectedPhoto"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:layout_marginStart="16dp"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnSubmitRequest"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Post Service Request"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="12dp"/>
+
+    </LinearLayout>
+</LinearLayout>
