@@ -25,7 +25,12 @@ SECRET_KEY = 'django-insecure-ho+%3(_-g^7ioy4tcapi&i_t@w8)+qaa$$v0*hwk21vkyfdss-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '*',            # Allow all hosts in development (Android emulator, physical device, etc.)
+    '127.0.0.1',
+    'localhost',
+    '10.0.2.2',     # Android Emulator → host machine
+]
 
 
 # Application definition
@@ -40,10 +45,17 @@ INSTALLED_APPS = [
     
     # Custom Apps
     'nexus_core',
+
+    # DRF & Auth
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',        # Must be before CommonMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -136,3 +148,48 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'my_requests'
 LOGOUT_REDIRECT_URL = 'login'
+
+# ===========================================================================
+# Django REST Framework
+# ===========================================================================
+from datetime import timedelta
+
+REST_FRAMEWORK = {
+    # JWT is the default authenticator for the DRF API layer
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    # Unauthenticated requests are denied by default
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    # Return standard DRF error format with a top-level "detail" key
+    'NON_FIELD_ERRORS_KEY': 'detail',
+    # Pagination (optional — API consumers can override per-view)
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+# ---------------------------------------------------------------------------
+# Simple JWT settings
+# ---------------------------------------------------------------------------
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+}
+
+# ===========================================================================
+# CORS (django-cors-headers)
+# ===========================================================================
+# In development allow all origins; tighten this in production.
+CORS_ALLOW_ALL_ORIGINS = True   # Change to CORS_ALLOWED_ORIGINS list in production
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",   # React / Vue dev server
+#     "http://localhost:5173",   # Vite dev server
+# ]
+
